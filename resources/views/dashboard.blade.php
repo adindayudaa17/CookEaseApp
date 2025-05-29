@@ -94,8 +94,8 @@
         <nav class="navbar">
             <a href="/dashboard" class="active">Home</a>
             <a href="/favorites">Favorites</a>
-            <a href="/recipes/{id}">Meal Plan</a>
-            <a href="/cooking-ast">Cooking Ast</a>
+            <a href="/meal-plan">Meal Plan</a>
+            <a href="/chatbot">Cooking Ast</a>
             <a href="/settings">Settings</a>
         </nav>
     </div>
