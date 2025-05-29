@@ -18,14 +18,16 @@
 
         .header {
             background: white;
-            padding: 20px;
+            padding: 20px 40px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .logo {
@@ -39,8 +41,6 @@
         .navbar {
             display: flex;
             gap: 25px;
-            flex-grow: 1;
-            justify-content: flex-end;
             font-weight: normal;
             font-size: 16px;
         }
@@ -92,17 +92,12 @@
         <div class="logo">CookEase</div>
         
         <nav class="navbar">
-            <a href="dashboard" class="active">Home</a>
+            <a href="/dashboard" class="active">Home</a>
             <a href="/favorites">Favorites</a>
             <a href="/meal-plan">Meal Plan</a>
             <a href="/cooking-ast">Cooking Ast</a>
             <a href="/settings">Settings</a>
         </nav>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn">Logout</button>
-        </form>
     </div>
 
     <div class="content">
