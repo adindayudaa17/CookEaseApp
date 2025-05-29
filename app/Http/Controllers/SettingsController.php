@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SettingsController extends Controller
 {
+    // Tampilkan form edit nama
+    public function editName()
+    {
+        return view('edit-name');
+    }
+
+    // Proses update nama
     public function updateName(Request $request)
     {
         $request->validate([
@@ -17,6 +24,6 @@ class SettingsController extends Controller
         $user->name = $request->input('name');
         $user->save();
 
-        return redirect('/settings')->with('success', 'Name updated successfully.');
+        return redirect()->route('settings')->with('success', 'Name updated successfully.');
     }
 }

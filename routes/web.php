@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SettingsController;
+
 
 // Home page
 Route::get('/', function () {
@@ -15,7 +17,9 @@ Route::get('/signup', [AuthController::class, 'showSignupForm'])->name('signup')
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/settings', function () {return view('settings');})->name('settings');
-Route::put('/edit-name', [SettingsController::class, 'updateName'])->name('edit-name');
+Route::get('/edit-name', [SettingsController::class, 'editName'])->name('edit-name');
+Route::put('/update-name', [SettingsController::class, 'updateName'])->name('updateName');
+
 
 
 

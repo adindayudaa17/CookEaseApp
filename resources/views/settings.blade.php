@@ -163,7 +163,7 @@
     <div class="content">
         <div class="welcome">
             <h1>{{ Auth::user()->name }}</h1>
-            <p>Joined in {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('M,Y') }}</p>
+            <p>Joined in {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('M, Y') }}</p>
 
             <div class="section-title">Settings</div>
 
@@ -176,9 +176,14 @@
                 <div class="info-label">Name</div>
                 <div class="info-value plain">{{ Auth::user()->name }} 
                     <a href="{{ route('edit-name') }}">
-                    <button class="edit-btn">Edit</button>
-                </a>
+                        <button class="edit-btn">Edit</button>
+                    </a>
                 </div>
+                @if(session('success'))
+                        <div style="color: green; margin-bottom: 20px;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
             </div>
 
             <div class="actions">

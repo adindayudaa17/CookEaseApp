@@ -2,77 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Name</title>
+    <title>Edit Name - Settings</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
         }
 
-        .form-container {
-            background: white;
-            padding: 40px;
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: white;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            width: 400px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
         h2 {
-            margin-bottom: 20px;
+            text-align: center;
             color: #b73e3e;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
         }
 
         label {
-            display: block;
             margin-bottom: 10px;
             font-weight: bold;
+            color: #333;
         }
 
         input[type="text"] {
-            width: 100%;
             padding: 10px;
-            margin-bottom: 20px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            margin-bottom: 20px;
         }
 
-        button {
-            background-color: #b73e3e;
-            color: white;
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: bold;
         }
 
-        a {
-            display: inline-block;
-            margin-top: 15px;
-            color: #b73e3e;
+        .btn-update {
+            background-color: #b73e3e;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #ccc;
+            color: #333;
             text-decoration: none;
+            display: inline-block;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Edit Name</h2>
-        <form method="POST" action="{{ route('settings.update') }}">
+
+    <div class="container">
+        <h2>Edit Your Name</h2>
+
+        <form action="{{ route('updateName') }}" method="POST">
             @csrf
+            @method('PUT')
+
             <label for="name">New Name</label>
-            <input type="text" id="name" name="name" value="{{ Auth::user()->name }}" required>
+            <input type="text" name="name" id="name" value="{{ old('name', Auth::user()->name) }}" required>
 
-            <button type="submit">Update</button>
+            @if ($errors->has('name'))
+                <div class="error">{{ $errors->first('name') }}</div>
+            @endif
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-update">Update</button>
+                <a href="{{ route('settings') }}" class="btn btn-cancel">Cancel</a>
+            </div>
         </form>
-
-        <a href="{{ route('settings') }}">← Back to Settings</a>
     </div>
+
 </body>
 </html>
-@if(session('success'))
-    <p style="color: green; margin-top: 10px;">{{ session('success') }}</p>
-@endif
