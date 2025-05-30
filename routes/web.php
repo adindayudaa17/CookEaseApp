@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\RatingController; // Pastikan ini di-import
 use App\Models\Recipe;
 
 // Home page
@@ -35,11 +37,19 @@ Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index'
 Route::get('/rate-recipes', [App\Http\Controllers\RatingController::class, 'index'])->middleware('auth')->name('rate-recipes');
 Route::post('/rate-recipe/{id}', [App\Http\Controllers\RatingController::class, 'store'])->middleware('auth')->name('rate-recipe');
 
-Route::get('/dashboard', function () {
-    $recipes = Recipe::all(); // atau Recipe::latest()->take(4)->get();
-    return view('dashboard', compact('recipes'));
-})->middleware('auth')->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        $recipes = Recipe::all();
+        return view('dashboard', compact('recipes'));
+    })->name('dashboard');
 
+    // FAVORITES ROUTES
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{recipe_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
+    // Pindahkan route lain yang butuh login ke sini jika ada (misal settings, chatbot jika perlu)
+});
 // Protected routes
 
