@@ -164,6 +164,7 @@
         <nav class="navbar">
             <a href="/dashboard">Home</a>
             <a href="/favorites">Favorites</a>
+            <a href="/rate-recipes">Rate Recipe</a>
             <a href="/chatbot" class="active">Cooking Ast</a>
             <a href="/settings">Settings</a>
         </nav>
