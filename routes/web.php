@@ -1,55 +1,107 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\RecipeController;
-use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\RatingController; // Pastikan ini di-import
-use App\Models\Recipe;
+use Illuminate\Support\Facades\DB;
 
-// Home page
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function (Illuminate\Http\Request $request) {
+    $search = $request->get('search', '');
+    $category = $request->get('category', 'all');
+    $showAll = $request->get('show_all', false);
+
+    $query = DB::table('recipes')
+        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
+        ->select('recipes.*', 'categories.name as category_name');
+
+    if ($search) {
+        $query->where('recipes.name', 'LIKE', "%{$search}%");
+    }
+
+    if ($category && $category !== 'all') {
+        $query->where('categories.name', $category);
+    }
+
+    if (!$showAll) {
+        $query->limit(4);
+    }
+
+    $recipes = $query->get();
+    $totalRecipes = DB::table('recipes')->count();
+
+    // Make sure all variables are defined
+    return view('welcome', compact('recipes', 'totalRecipes', 'search', 'category', 'showAll'));
 })->name('home');
 
-// Authentication routes
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/signup', [AuthController::class, 'showSignupForm'])->name('signup');
-Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/settings', function () {return view('settings');})->name('settings');
-Route::get('/edit-name', [SettingsController::class, 'editName'])->name('edit-name');
-Route::put('/update-name', [SettingsController::class, 'updateName'])->name('updateName');
-Route::get('/chatbot', [ChatbotController::class, 'index']);
-Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage']);
+Route::get('/dashboard', function (Illuminate\Http\Request $request) {
+    $search = $request->get('search', '');
+    $category = $request->get('category', 'all');
+    $showAll = $request->get('show_all', false);
 
+    $query = DB::table('recipes')
+        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
+        ->select('recipes.*', 'categories.name as category_name');
 
-Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
-Route::get('/recipes/{id}/instruction', [RecipeController::class, 'instruction'])->name('recipes.instruction');
+    if ($search) {
+        $query->where('recipes.name', 'LIKE', "%{$search}%");
+    }
 
-Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
-Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
+    if ($category && $category !== 'all') {
+        $query->where('categories.name', $category);
+    }
 
-// Rating routes
-Route::get('/rate-recipes', [App\Http\Controllers\RatingController::class, 'index'])->middleware('auth')->name('rate-recipes');
-Route::post('/rate-recipe/{id}', [App\Http\Controllers\RatingController::class, 'store'])->middleware('auth')->name('rate-recipe');
+    if (!$showAll) {
+        $query->limit(4);
+    }
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        $recipes = Recipe::all();
-        return view('dashboard', compact('recipes'));
-    })->name('dashboard');
+    $recipes = $query->get();
+    $totalRecipes = DB::table('recipes')->count();
 
-    // FAVORITES ROUTES
-    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
-    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
-    Route::delete('/favorites/{recipe_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
-    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+    return view('welcome', compact('recipes', 'totalRecipes', 'search', 'category', 'showAll'));
+})->name('dashboard');
 
-    // Pindahkan route lain yang butuh login ke sini jika ada (misal settings, chatbot jika perlu)
-});
-// Protected routes
+Route::get('/recipes/{id}', function ($id) {
+    $recipe = DB::table('recipes')
+        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
+        ->select('recipes.*', 'categories.name as category_name')
+        ->where('recipes.recipe_id', $id)
+        ->first();
 
+    if (!$recipe) {
+        abort(404);
+    }
+
+    return view('recipes.show', compact('recipe'));
+})->name('recipes.show');
+
+Route::get('/recipes/{id}/instruction', function ($id) {
+    $recipe = DB::table('recipes')
+        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
+        ->select('recipes.*', 'categories.name as category_name')
+        ->where('recipes.recipe_id', $id)
+        ->first();
+
+    if (!$recipe) {
+        abort(404);
+    }
+
+    return view('recipes.instruction', compact('recipe'));
+})->name('recipes.instruction');
+
+Route::get('/favorites', function () {
+    return view('favorites');
+})->name('favorites');
+
+Route::get('/chatbot', function () {
+    return view('chatbot');
+})->name('chatbot');
+
+Route::get('/cooking-assist', function () {
+    return view('chatbot');
+})->name('cooking-assist');
+
+Route::get('/settings', function () {
+    return view('settings');
+})->name('settings');
+
+Route::get('/rate-recipes', function () {
+    return view('rate-recipes');
+})->name('rate-recipes');

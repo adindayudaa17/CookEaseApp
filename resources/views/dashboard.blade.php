@@ -89,12 +89,11 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">CookEase</div>
-        
+        <div class="logo cookease-brand">CookEase</div>
+
         <nav class="navbar">
             <a href="/dashboard" class="active">Home</a>
             <a href="/favorites">Favorites</a>
-            <a href="/rate-recipes">Rate Recipe</a>
             <a href="/chatbot">Cooking Ast</a>
             <a href="/settings">Settings</a>
         </nav>

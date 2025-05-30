@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User;     // <-- PASTIKAN INI ADA
-use App\Models\Category; 
 
 class Recipe extends Model
 {
@@ -38,30 +35,5 @@ class Recipe extends Model
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
-    }
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function ratings()
-    {
-        return $this->hasMany(Rating::class, 'recipe_id', 'recipe_id');
-    }
-
-    public function getAverageRatingAttribute()
-    {
-        return $this->ratings()->avg('rating') ?: 0;
-    }
-
-    public function getTotalReviewsAttribute()
-    {
-        return $this->ratings()->count();
-    }
-
-    public function favoritedByUsers()
-    {
-        return $this->belongsToMany(User::class, 'favorites', 'recipe_id', 'user_id')
-                    ->withTimestamps();
     }
 }

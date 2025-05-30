@@ -3,83 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome - CookEase</title>
+    <title>CookEase - What are you cooking today?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .recipe-card {
+            transition: transform 0.2s;
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        .recipe-card:hover {
+            transform: translateY(-4px);
         }
-
-        .container {
-            text-align: center;
-            background: white;
-            padding: 60px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        :root {
+            --primary-red: #8A2424;
         }
-
-        .logo {
-            font-size: 48px;
-            font-weight: bold;
-            color: #b73e3e;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 40px;
-        }
-
-        .buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .btn-primary {
-            background-color: #b73e3e;
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: white;
-            color: #b73e3e;
-            border: 2px solid #b73e3e;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
+        .bg-primary { background-color: var(--primary-red); }
+        .text-primary { color: var(--primary-red); }
+        .border-primary { border-color: var(--primary-red); }
+        .hover\:bg-primary:hover { background-color: var(--primary-red); }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="logo">CookEase</div>
-        <div class="subtitle">Your cooking companion for delicious recipes</div>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-primary cookease-brand">CookEase</h1>
+                </div>
+                <nav class="flex space-x-8">
+                    <a href="/" class="text-primary font-medium">Home</a>
+                    <a href="/favorites" class="text-gray-600 hover:text-gray-900">Favorites</a>
+                    <a href="/cooking-assist" class="text-gray-600 hover:text-gray-900">Cooking Assist</a>
+                    <a href="/settings" class="text-gray-600 hover:text-gray-900">Settings</a>
+                </nav>
+            </div>
+        </div>
+    </header>
 
-        <div class="buttons">
-            <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
-            <a href="{{ route('signup') }}" class="btn btn-secondary">Sign Up</a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                What are you<br>cooking today?
+            </h2>
+
+            <!-- Search Bar -->
+            <form method="GET" action="/" class="relative max-w-2xl mb-8">
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" id="searchInput" name="search" value="{{ $search ?? '' }}" placeholder="Search any recipes" class="pl-10 pr-10 w-full h-12 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                <button type="button" id="clearSearch" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 h-5 w-5 {{ ($search ?? '') ? '' : 'hidden' }}" onclick="clearSearchInput()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <input type="hidden" name="category" value="{{ $category ?? 'all' }}">
+                <input type="hidden" name="show_all" value="{{ $showAll ? '1' : '0' }}">
+            </form>
+
+            <!-- Featured Banner -->
+            <div class="bg-primary text-white overflow-hidden relative h-44 sm:h-52 rounded-xl">
+                <div class="flex h-full relative">
+                    <div class="p-6 sm:p-8 flex-1 z-10 flex flex-col justify-center">
+                        <h3 class="text-xl sm:text-3xl font-bold mb-4">
+                            Cook the best<br>recipes at home
+                        </h3>
+                        <button onclick="scrollToRecipes()" class="bg-white text-primary hover:bg-gray-100 px-6 py-2 rounded-full font-medium w-fit">
+                            Explore
+                        </button>
+                    </div>
+                    <div class="absolute right-4 top-0 h-full w-1/4">
+                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200" alt="Chef cooking" class="h-full w-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="mb-8" id="recipes-section">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Categories</h3>
+            <div class="flex flex-wrap gap-3">
+                <a href="/?category=all{{ $search ? '&search=' . $search : '' }}"
+                   class="px-6 py-2 rounded-full font-medium {{ (!$category || $category === 'all') ? 'bg-primary text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    All
+                </a>
+                <a href="/?category=Breakfast{{ $search ? '&search=' . $search : '' }}"
+                   class="px-6 py-2 rounded-full font-medium {{ $category === 'Breakfast' ? 'bg-primary text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    Breakfast
+                </a>
+                <a href="/?category=Lunch{{ $search ? '&search=' . $search : '' }}"
+                   class="px-6 py-2 rounded-full font-medium {{ $category === 'Lunch' ? 'bg-primary text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    Lunch
+                </a>
+                <a href="/?category=Dinner{{ $search ? '&search=' . $search : '' }}"
+                   class="px-6 py-2 rounded-full font-medium {{ $category === 'Dinner' ? 'bg-primary text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    Dinner
+                </a>
+                <a href="/?category=Dessert{{ $search ? '&search=' . $search : '' }}"
+                   class="px-6 py-2 rounded-full font-medium {{ $category === 'Dessert' ? 'bg-primary text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    Dessert
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick & Easy Section -->
+        <div>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Quick & Easy <span class="text-sm font-normal text-gray-500">({{ $recipes->count() }} recipes)</span>
+                </h3>
+                @if(!$showAll && $recipes->count() >= 4)
+                    <a href="/?show_all=1{{ $category ? '&category=' . $category : '' }}{{ $search ? '&search=' . $search : '' }}"
+                       class="text-primary hover:text-red-700 font-medium">View all</a>
+                @elseif($showAll)
+                    <a href="/?{{ $category ? 'category=' . $category : '' }}{{ $search ? '&search=' . $search : '' }}"
+                       class="text-primary hover:text-red-700 font-medium">Close</a>
+                @endif
+            </div>
+
+            <!-- Recipe Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @forelse($recipes as $recipe)
+                <div class="recipe-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer" onclick="window.location.href='/recipes/{{ $recipe->recipe_id }}'">
+                    <div class="h-48 bg-gray-200 relative">
+                        <img src="{{ $recipe->image_url }}" alt="{{ $recipe->name }}" class="w-full h-full object-cover">
+                        <button class="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <span class="inline-block bg-red-100 text-primary text-xs px-2 py-1 rounded-full mb-2">{{ $recipe->category_name ?? 'Recipe' }}</span>
+                        <h4 class="font-semibold text-gray-900 mb-1">{{ $recipe->name }}</h4>
+                        <p class="text-sm text-gray-600">{{ $recipe->cal }} cal • {{ $recipe->time }} min</p>
+                    </div>
+                </div>
+                @empty
+                <div class="col-span-full text-center py-8">
+                    <p class="text-gray-500">No recipes found matching your search.</p>
+                </div>
+                @endforelse
+            </div>
+
+            @if($showAll && $recipes->count() > 4)
+            <div class="text-center mt-8">
+                <p class="text-gray-500">Showing {{ $recipes->count() }} of {{ $totalRecipes }} recipes</p>
+            </div>
+            @endif
         </div>
     </div>
+
+    <script>
+        function scrollToRecipes() {
+            document.getElementById('recipes-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        function clearSearchInput() {
+            const searchInput = document.getElementById('searchInput');
+            const clearButton = document.getElementById('clearSearch');
+
+            searchInput.value = '';
+            clearButton.classList.add('hidden');
+
+
+            window.location.href = '/';
+        }
+
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const clearButton = document.getElementById('clearSearch');
+            if (this.value.length > 0) {
+                clearButton.classList.remove('hidden');
+            } else {
+                clearButton.classList.add('hidden');
+            }
+
+
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        });
+
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.form.submit();
+            }
+        });
+    </script>
 </body>
 </html>
