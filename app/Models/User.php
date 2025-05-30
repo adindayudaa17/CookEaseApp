@@ -24,4 +24,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
 }
