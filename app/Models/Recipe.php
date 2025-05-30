@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;     // <-- PASTIKAN INI ADA
+use App\Models\Category; 
 
 class Recipe extends Model
 {
@@ -54,5 +57,11 @@ class Recipe extends Model
     public function getTotalReviewsAttribute()
     {
         return $this->ratings()->count();
+    }
+
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'recipe_id', 'user_id')
+                    ->withTimestamps();
     }
 }
