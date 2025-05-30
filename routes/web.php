@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ChatbotController;
+use App\Models\Recipe;
 
 // Home page
 Route::get('/', function () {
@@ -29,12 +30,16 @@ Route::get('/recipes/{id}/instruction', [RecipeController::class, 'instruction']
 
 
 
+Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
+Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
 
+
+
+Route::get('/dashboard', function () {
+    $recipes = Recipe::all(); // atau Recipe::latest()->take(4)->get();
+    return view('dashboard', compact('recipes'));
+})->middleware('auth')->name('dashboard');
 
 
 // Protected routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
+

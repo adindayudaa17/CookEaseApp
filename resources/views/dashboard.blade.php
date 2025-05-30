@@ -94,7 +94,6 @@
         <nav class="navbar">
             <a href="/dashboard" class="active">Home</a>
             <a href="/favorites">Favorites</a>
-            <a href="/meal-plan">Meal Plan</a>
             <a href="/chatbot">Cooking Ast</a>
             <a href="/settings">Settings</a>
         </nav>
@@ -108,5 +107,20 @@
             <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
         </div>
     </div>
+    <div class="mt-5">
+        <h2 class="mb-3">Featured Recipes</h2>
+
+        @foreach ($recipes as $recipe)
+            <div class="card mb-3" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+                <h5 style="margin-bottom: 10px;">{{ $recipe->name }}</h5>
+                <p style="margin-bottom: 5px;">🔥 {{ $recipe->cal }} cal &nbsp; ⏱ {{ $recipe->time }} Min</p>
+                <a href="{{ route('recipes.show', $recipe->recipe_id) }}" class="btn btn-sm btn-danger">
+                    View Recipe →
+                </a>
+            </div>
+        @endforeach
+    </div>
+
+
 </body>
 </html>
