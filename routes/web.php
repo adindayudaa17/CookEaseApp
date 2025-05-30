@@ -28,12 +28,12 @@ Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage']);
 Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
 Route::get('/recipes/{id}/instruction', [RecipeController::class, 'instruction'])->name('recipes.instruction');
 
-
-
 Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
 Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
 
-
+// Rating routes
+Route::get('/rate-recipes', [App\Http\Controllers\RatingController::class, 'index'])->middleware('auth')->name('rate-recipes');
+Route::post('/rate-recipe/{id}', [App\Http\Controllers\RatingController::class, 'store'])->middleware('auth')->name('rate-recipe');
 
 Route::get('/dashboard', function () {
     $recipes = Recipe::all(); // atau Recipe::latest()->take(4)->get();
