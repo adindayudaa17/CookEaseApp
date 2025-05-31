@@ -72,8 +72,8 @@
                             Explore
                         </button>
                     </div>
-                    <div class="absolute right-4 top-0 h-full w-1/4">
-                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200" alt="Chef cooking" class="h-full w-full object-cover">
+                    <div class="absolute right-8 top-0 h-full w-1/4">
+                        <img src="https://purepng.com/public/uploads/large/purepng.com-chefcheftrained-professional-cookfood-preparationkitchenchefsexperienced-1421526669538jccuo.png" alt="Chef cooking" class="h-full w-full object-cover">
                     </div>
                 </div>
             </div>
