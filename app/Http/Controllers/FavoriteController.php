@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recipe;
-use App\Models\User; // Baik untuk type hinting, meskipun Auth::user() tidak memerlukan ini secara langsung
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Untuk mengambil user yang login
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FavoriteController extends Controller
 {
     /**
      * Semua method di controller ini memerlukan user untuk login.
-     */
+    //  */
     // public function __construct()
     // {
     //     $this->middleware('auth');
@@ -23,7 +24,7 @@ class FavoriteController extends Controller
     public function index()
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user(); // Mengambil user yang sedang login
+        $user = Auth::user();
 
         $userFavoriteRecipes = $user->favoriteRecipes()->orderBy('favorites.created_at', 'desc')->get();
 
@@ -78,10 +79,10 @@ class FavoriteController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $recipe = Recipe::find($recipe_id); // Untuk nama di pesan feedback
+        $recipe = Recipe::find($recipe_id);
         $recipeName = $recipe ? htmlspecialchars($recipe->name) : 'Resep tersebut';
 
-        if ($user->favoriteRecipes()->detach($recipe_id)) { // detach mengembalikan jumlah record yang dihapus
+        if ($user->favoriteRecipes()->detach($recipe_id)) {
             return redirect()->route('favorites.index')->with('success', $recipeName . ' berhasil dihapus dari favorit.');
         } else {
             return redirect()->route('favorites.index')->with('error', 'Gagal menghapus ' . $recipeName . ' dari favorit (mungkin sudah tidak ada).');
@@ -93,39 +94,75 @@ class FavoriteController extends Controller
      */
     public function toggle(Request $request)
     {
-        $request->validate([
-            'recipe_id' => 'required|integer|exists:recipes,recipe_id',
-        ]);
+        try {
+            $request->validate([
+                'recipe_id' => 'required|integer|exists:recipes,recipe_id',
+            ]);
 
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $recipeId = $request->input('recipe_id');
+            $recipe = Recipe::find($recipeId);
+
+            if (!$recipe) {
+                if ($request->expectsJson()) { 
+                    return response()->json(['error' => 'Resep tidak ditemukan.'], 404); 
+                }
+                return back()->with('error', 'Resep tidak ditemukan.');
+            }
+
+            $message = '';
+            $status = '';
+            $isFavorited = $user->favoriteRecipes()->where('recipes.recipe_id', $recipeId)->exists();
+
+            if ($isFavorited) {
+                // Remove from favorites
+                $user->favoriteRecipes()->detach($recipeId);
+                $message = htmlspecialchars($recipe->name) . ' dihapus dari favorit.';
+                $status = 'removed';
+                Log::info("Recipe {$recipeId} removed from favorites for user {$user->id}");
+            } else {
+                // Add to favorites
+                $user->favoriteRecipes()->attach($recipeId);
+                $message = htmlspecialchars($recipe->name) . ' ditambahkan ke favorit.';
+                $status = 'added';
+                Log::info("Recipe {$recipeId} added to favorites for user {$user->id}");
+            }
+
+            if ($request->expectsJson()) {
+                // Untuk respons AJAX, sertakan juga status favorit baru
+                $isNowFavorited = !$isFavorited;
+                return response()->json([
+                    'message' => $message, 
+                    'status' => $status, 
+                    'recipe_id' => $recipeId, 
+                    'isFavorited' => $isNowFavorited
+                ]);
+            }
+            
+            return back()->with('success', $message);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in toggle favorite: ' . $e->getMessage());
+            
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Terjadi kesalahan. Silakan coba lagi.'], 500);
+            }
+            
+            return back()->with('error', 'Terjadi kesalahan. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Check if recipe is favorited by current user (API endpoint)
+     */
+    public function checkStatus($recipe_id)
+    {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $recipeId = $request->input('recipe_id');
-        $recipe = Recipe::find($recipeId);
-
-        if (!$recipe) {
-            if ($request->expectsJson()) { return response()->json(['error' => 'Resep tidak ditemukan.'], 404); }
-            return back()->with('error', 'Resep tidak ditemukan.');
-        }
-
-        $message = '';
-        $status = '';
-        $isFavorited = $user->favoriteRecipes()->where('recipes.recipe_id', $recipeId)->exists();
-
-        if ($isFavorited) {
-            $user->favoriteRecipes()->detach($recipeId);
-            $message = htmlspecialchars($recipe->name) . ' dihapus dari favorit.';
-            $status = 'removed';
-        } else {
-            $user->favoriteRecipes()->attach($recipeId);
-            $message = htmlspecialchars($recipe->name) . ' ditambahkan ke favorit.';
-            $status = 'added';
-        }
-
-        if ($request->expectsJson()) {
-            // Untuk respons AJAX, sertakan juga status favorit baru
-            $isNowFavorited = !$isFavorited;
-            return response()->json(['message' => $message, 'status' => $status, 'recipe_id' => $recipeId, 'isFavorited' => $isNowFavorited]);
-        }
-        return back()->with('success', $message);
+        
+        $isFavorited = $user->favoriteRecipes()->where('recipes.recipe_id', $recipe_id)->exists();
+        
+        return response()->json(['isFavorited' => $isFavorited]);
     }
 }
