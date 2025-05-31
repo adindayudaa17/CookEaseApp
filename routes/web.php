@@ -30,11 +30,11 @@ Route::get('/recipes/{id}/instruction', [RecipeController::class, 'instruction']
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function (Request $request) { // <-- Tambahkan Request $request
-        $search = $request->input('search');
-        $categoryFilter = $request->input('category', 'all'); // Ambil category, default 'all'
+    Route::get('/dashboard', function () { // <-- Hapus Request $request dari sini
+        $search = request('search'); // Menggunakan helper request()
+        $categoryFilter = request('category', 'all'); // Menggunakan helper request()
 
-        $query = Recipe::with('category'); // Eager load category untuk efisiensi
+        $query = Recipe::with('category');
 
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');
@@ -42,36 +42,26 @@ Route::middleware(['auth'])->group(function () {
 
         if ($categoryFilter && $categoryFilter !== 'all') {
             $query->whereHas('category', function($q) use ($categoryFilter) {
-                $q->where('name', $categoryFilter); // Asumsi filter berdasarkan nama kategori
+                $q->where('name', $categoryFilter);
             });
         }
         
         $recipes = $query->get();
 
-        // ---  LOGIKA UNTUK STATUS FAVORIT ---
-        if (Auth::check()) { // Hanya jika user sudah login
+        if (Auth::check()) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            // Ambil semua ID resep favorit user dalam satu query untuk efisiensi
             $favoriteRecipeIds = $user->favoriteRecipes()->pluck('recipes.recipe_id')->toArray();
-
             foreach ($recipes as $recipe) {
                 $recipe->is_favorited = in_array($recipe->recipe_id, $favoriteRecipeIds);
             }
         } else {
-            // Jika tidak ada user login (seharusnya tidak terjadi karena middleware 'auth')
-            // atau jika kamu ingin handle kasus ini secara eksplisit:
             foreach ($recipes as $recipe) {
-                $recipe->is_favorited = false; // Defaultnya tidak ada yang difavoritkan
+                $recipe->is_favorited = false;
             }
         }
-        // --- AKHIR DARI LOGIKA STATUS FAVORIT ---
         
-        // Ambil variabel $showAll untuk logika View All/Show Less di view
-        // Jika tidak ada parameter 'show_all' di URL, defaultnya false (tidak menampilkan semua)
-        // Kamu menggunakan $index >= 4 ? 'hidden recipe-extra' : '' di view,
-        // jadi kita perlu cara untuk toggle ini. Jika menggunakan parameter URL:
-        $showAll = $request->input('show_all', '0') === '1'; // '0' atau '1' dari URL, konversi ke boolean
+        $showAll = request('show_all', '0') === '1'; // Menggunakan helper request()
 
         return view('dashboard', compact('recipes', 'search', 'categoryFilter', 'showAll'));
     })->name('dashboard');
@@ -81,9 +71,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('settings');
     Route::get('/edit-name', [SettingsController::class, 'editName'])->name('edit-name');
     Route::put('/update-name', [SettingsController::class, 'updateName'])->name('updateName');
-    Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index'); // Beri nama jika belum
-    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->name('chatbot.send'); // Beri nama jika belum
-
+    Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
+    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage']);
     // Favorites routes
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
