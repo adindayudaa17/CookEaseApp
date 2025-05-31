@@ -341,10 +341,11 @@
 <div class="header">
     <div class="logo cookease-brand">CookEase</div>
     <nav class="navbar">
-        <a href="/dashboard">Home</a>
-        <a href="/favorites">Favorites</a>
-        <a href="/chatbot">Cooking Ast</a>
-        <a href="/settings">Settings</a>
+        <a href="{{ route('dashboard') }}">Home</a>
+        <a href="{{ route('favorites.index') }}">Favorites</a>
+        <a href="{{ route('rate-recipes') }}">Rate Recipe</a>
+        <a href="{{ route('chatbot') }}">Cooking Assistant</a>
+        <a href="{{ route('settings') }}">Settings</a>
     </nav>
 </div>
 
@@ -353,7 +354,7 @@
         <div class="hero-image-container">
             <!-- Back Button positioned over the image -->
             <div class="back-button">
-                <a href="/">
+                <a href="{{ route('dashboard') }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>

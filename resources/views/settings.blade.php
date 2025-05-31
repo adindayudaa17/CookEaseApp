@@ -70,7 +70,7 @@
         }
 
        .content {
-        max-width: 1000px; 
+        max-width: 1000px;
         margin: 40px auto;
         padding: 0 20px;
         }
@@ -81,7 +81,7 @@
         border-radius: 10px;
         box-shadow: 0 0 20px rgba(0,0,0,0.1);
         text-align: center;
-        }   
+        }
 
         .welcome h1 {
             font-size: 28px;
@@ -115,7 +115,7 @@
         }
 
         .info-value {
-            flex: 1; 
+            flex: 1;
             color: #b73e3e;
             text-decoration: underline;
             display: flex;
@@ -125,7 +125,7 @@
 
         .info-value.plain {
             justify-content: space-between;
-        }     
+        }
 
         .actions {
             display: flex;
@@ -174,7 +174,7 @@
 
             <div class="info-group">
                 <div class="info-label">Name</div>
-                <div class="info-value plain">{{ Auth::user()->name }} 
+                <div class="info-value plain">{{ Auth::user()->name }}
                     <a href="{{ route('edit-name') }}">
                         <button class="edit-btn">Edit</button>
                     </a>

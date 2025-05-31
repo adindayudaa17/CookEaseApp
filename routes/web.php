@@ -1,107 +1,69 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\RatingController;
+use App\Models\Recipe;
 
-Route::get('/', function (Illuminate\Http\Request $request) {
-    $search = $request->get('search', '');
-    $category = $request->get('category', 'all');
-    $showAll = $request->get('show_all', false);
-
-    $query = DB::table('recipes')
-        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
-        ->select('recipes.*', 'categories.name as category_name');
-
-    if ($search) {
-        $query->where('recipes.name', 'LIKE', "%{$search}%");
-    }
-
-    if ($category && $category !== 'all') {
-        $query->where('categories.name', $category);
-    }
-
-    if (!$showAll) {
-        $query->limit(4);
-    }
-
-    $recipes = $query->get();
-    $totalRecipes = DB::table('recipes')->count();
-
-    // Make sure all variables are defined
-    return view('welcome', compact('recipes', 'totalRecipes', 'search', 'category', 'showAll'));
+// Home page
+Route::get('/', function () {
+    return view('welcome');
 })->name('home');
 
-Route::get('/dashboard', function (Illuminate\Http\Request $request) {
-    $search = $request->get('search', '');
-    $category = $request->get('category', 'all');
-    $showAll = $request->get('show_all', false);
+// Authentication routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/signup', [AuthController::class, 'showSignupForm'])->name('signup');
+Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    $query = DB::table('recipes')
-        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
-        ->select('recipes.*', 'categories.name as category_name');
+// Public recipe routes
+Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
+Route::get('/recipes/{id}', [RecipeController::class, 'show'])->name('recipes.show');
+Route::get('/recipes/{id}/instruction', [RecipeController::class, 'instruction'])->name('recipes.instruction');
 
-    if ($search) {
-        $query->where('recipes.name', 'LIKE', "%{$search}%");
-    }
+// Protected routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        $search = request('search');
+        $category = request('category', 'all');
 
-    if ($category && $category !== 'all') {
-        $query->where('categories.name', $category);
-    }
+        $query = Recipe::with('category');
 
-    if (!$showAll) {
-        $query->limit(4);
-    }
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
 
-    $recipes = $query->get();
-    $totalRecipes = DB::table('recipes')->count();
+        if ($category && $category !== 'all') {
+            $query->whereHas('category', function($q) use ($category) {
+                $q->where('name', $category);
+            });
+        }
 
-    return view('welcome', compact('recipes', 'totalRecipes', 'search', 'category', 'showAll'));
-})->name('dashboard');
+        $recipes = $query->get();
 
-Route::get('/recipes/{id}', function ($id) {
-    $recipe = DB::table('recipes')
-        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
-        ->select('recipes.*', 'categories.name as category_name')
-        ->where('recipes.recipe_id', $id)
-        ->first();
+        return view('dashboard', compact('recipes'));
+    })->name('dashboard');
 
-    if (!$recipe) {
-        abort(404);
-    }
+    Route::get('/settings', function () {
+        return view('settings');
+    })->name('settings');
+    Route::get('/edit-name', [SettingsController::class, 'editName'])->name('edit-name');
+    Route::put('/update-name', [SettingsController::class, 'updateName'])->name('updateName');
+    Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
+    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage']);
 
-    return view('recipes.show', compact('recipe'));
-})->name('recipes.show');
+    // Favorites routes
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/favorites/{recipe_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
-Route::get('/recipes/{id}/instruction', function ($id) {
-    $recipe = DB::table('recipes')
-        ->leftJoin('categories', 'recipes.category_id', '=', 'categories.category_id')
-        ->select('recipes.*', 'categories.name as category_name')
-        ->where('recipes.recipe_id', $id)
-        ->first();
-
-    if (!$recipe) {
-        abort(404);
-    }
-
-    return view('recipes.instruction', compact('recipe'));
-})->name('recipes.instruction');
-
-Route::get('/favorites', function () {
-    return view('favorites');
-})->name('favorites');
-
-Route::get('/chatbot', function () {
-    return view('chatbot');
-})->name('chatbot');
-
-Route::get('/cooking-assist', function () {
-    return view('chatbot');
-})->name('cooking-assist');
-
-Route::get('/settings', function () {
-    return view('settings');
-})->name('settings');
-
-Route::get('/rate-recipes', function () {
-    return view('rate-recipes');
-})->name('rate-recipes');
+    // Rating routes
+    Route::get('/rate-recipes', [RatingController::class, 'index'])->name('rate-recipes');
+    Route::post('/rate-recipe/{id}', [RatingController::class, 'store'])->name('rate-recipe');
+});
