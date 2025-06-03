@@ -5,59 +5,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.css">
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
     <style>
-        .header {
-            background: white;
-            padding: 20px 40px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            width: calc(100% - 80px); 
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #b73e3e;
-            flex-shrink: 0;
-        }
-
-        .navbar {
-            display: flex;
-            gap: 25px;
-            font-weight: normal;
-            font-size: 16px;
-        }
-
-        .navbar a {
-            text-decoration: none;
-            color: #444;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
-        }
-
-        .navbar a:hover {
-            background-color: #f0f0f0;
-        }
-
-        .navbar a.active {
-            color: #b73e3e;
-            font-weight: bold;
-        }
-
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            margin: 0; 
-            padding: 0; 
+            margin: 0;
+            padding: 20px;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-       .chat-container {
+        .chat-container {
             width: 90%;
             max-width: 1200px;
             height: 80vh;
@@ -66,7 +24,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            margin: 20px auto; 
         }
         .chat-header {
             background: #dc3545;
@@ -115,12 +72,33 @@
         .bot .message-content i {
             font-style: italic;
             color: #5c0f0f;
-        }
-        .bot .message-content code {
+        }        .bot .message-content code {
             background: #fecaca;
             padding: 2px 4px;
             border-radius: 3px;
             font-family: monospace;
+        }
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .typing .dots {
+            display: flex;
+            gap: 4px;
+        }
+        .typing .dot {
+            width: 8px;
+            height: 8px;
+            background: #dc3545;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing .dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         .chat-input {
             padding: 20px;
@@ -156,27 +134,14 @@
             background: #b91c1c;
         }
     </style>
-    
 </head>
-<body>
-    <div class="header">
-        <div class="logo">CookEase</div>
-        <nav class="navbar">
-            <a href="/dashboard">Home</a>
-            <a href="/favorites">Favorites</a>
-            <a href="/rate-recipes">Rate Recipe</a>
-            <a href="/chatbot" class="active">Cooking Ast</a>
-            <a href="/settings">Settings</a>
-        </nav>
-    </div>   
-     <div class="chat-container">        <div class="chat-header">
+<body>    <div class="chat-container">        <div class="chat-header">
             <i class="fa-solid fa-utensils chef-icon"></i>
             <h2>Cooking Assistant</h2>
-        </div>
-        <div class="chat-messages" id="chatMessages">
+        </div>        <div class="chat-messages" id="chatMessages">
             <div class="message bot">
                 <div class="message-content">
-                    Hello! I'm your cooking assistant. How can I help you with your culinary adventures today?
+                    Halo! Saya adalah asisten memasak Anda. Bagaimana saya bisa membantu petualangan kuliner Anda hari ini? 😊
                 </div>
             </div>
         </div>
@@ -196,13 +161,25 @@
             e.preventDefault();
             
             const message = userInput.value;
-            if (!message.trim()) return;
-
-            // Add user message to chat
+            if (!message.trim()) return;           
             addMessage(message, 'user');
             userInput.value = '';
 
-            try {
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = `
+                <div class="message-content typing">
+                    <span>Cooking Assistant is typing</span>
+                    <div class="dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;            try {
                 const response = await fetch('/chatbot/send', {
                     method: 'POST',
                     headers: {
@@ -212,11 +189,31 @@
                     body: JSON.stringify({ message })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-                addMessage(data.response, 'bot');
+                
+                // Remove typing indicator before adding bot response
+                const typingIndicator = chatMessages.querySelector('.typing').parentNode;
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+
+                if (data.response) {
+                    addMessage(data.response, 'bot');
+                } else {
+                    throw new Error('No response data received');
+                }
             } catch (error) {
                 console.error('Error:', error);
-                addMessage('Sorry, something went wrong.', 'bot');
+                // Remove typing indicator if it exists
+                const typingIndicator = chatMessages.querySelector('.typing')?.parentNode;
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+                addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
             }
         });        const md = window.markdownit();
           function addMessage(message, type) {
