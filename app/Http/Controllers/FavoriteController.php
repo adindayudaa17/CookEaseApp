@@ -10,17 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class FavoriteController extends Controller
 {
-    /**
-     * Semua method di controller ini memerlukan user untuk login.
-    //  */
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-
-    /**
-     * Menampilkan daftar resep favorit user yang sedang login.
-     */
     public function index()
     {
         /** @var \App\Models\User $user */
@@ -41,10 +30,6 @@ class FavoriteController extends Controller
         }
         return view('favorites', ['favorites' => $favoritesForView]);
     }
-
-    /**
-     * Menyimpan resep baru ke daftar favorit user.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -55,13 +40,13 @@ class FavoriteController extends Controller
         $user = Auth::user();
         $recipeId = $request->input('recipe_id');
 
-        // Cek dulu apakah resep ada (meskipun sudah divalidasi exists)
+        // Cek dulu apakah resep ada (walau udah divalidasi exists)
         $recipe = Recipe::find($recipeId);
         if (!$recipe) {
             return back()->with('error', 'Resep tidak ditemukan.');
         }
 
-        // Cek apakah sudah difavoritkan
+        // Cek udah difavoritkan ato belum
         if (!$user->favoriteRecipes()->where('recipes.recipe_id', $recipeId)->exists()) {
             $user->favoriteRecipes()->attach($recipeId);
             return back()->with('success', htmlspecialchars($recipe->name) . ' berhasil ditambahkan ke favorit!');
@@ -69,11 +54,7 @@ class FavoriteController extends Controller
             return back()->with('info', htmlspecialchars($recipe->name) . ' sudah ada di daftar favorit Anda.');
         }
     }
-
-    /**
-     * Menghapus resep dari daftar favorit user.
-     * $recipe_id diambil dari parameter route.
-     */
+    // hapus
     public function destroy($recipe_id)
     {
         /** @var \App\Models\User $user */
@@ -88,10 +69,7 @@ class FavoriteController extends Controller
             return redirect()->route('favorites.index')->with('error', 'Gagal menghapus ' . $recipeName . ' dari favorit (mungkin sudah tidak ada).');
         }
     }
-
-    /**
-     * Toggle status favorit resep untuk user.
-     */
+    //toggle status favorit resep untuk user
     public function toggle(Request $request)
     {
         try {
@@ -116,13 +94,13 @@ class FavoriteController extends Controller
             $isFavorited = $user->favoriteRecipes()->where('recipes.recipe_id', $recipeId)->exists();
 
             if ($isFavorited) {
-                // Remove from favorites
+                // hapus dari favorit
                 $user->favoriteRecipes()->detach($recipeId);
                 $message = htmlspecialchars($recipe->name) . ' dihapus dari favorit.';
                 $status = 'removed';
                 Log::info("Recipe {$recipeId} removed from favorites for user {$user->id}");
             } else {
-                // Add to favorites
+                // tambahkan ke favorit
                 $user->favoriteRecipes()->attach($recipeId);
                 $message = htmlspecialchars($recipe->name) . ' ditambahkan ke favorit.';
                 $status = 'added';
@@ -130,7 +108,7 @@ class FavoriteController extends Controller
             }
 
             if ($request->expectsJson()) {
-                // Untuk respons AJAX, sertakan juga status favorit baru
+                // Untuk respons AJAX
                 $isNowFavorited = !$isFavorited;
                 return response()->json([
                     'message' => $message, 
@@ -153,9 +131,7 @@ class FavoriteController extends Controller
         }
     }
 
-    /**
-     * Check if recipe is favorited by current user (API endpoint)
-     */
+    // Cek status favorit resep untuk user
     public function checkStatus($recipe_id)
     {
         /** @var \App\Models\User $user */
