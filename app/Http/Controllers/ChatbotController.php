@@ -12,7 +12,23 @@ class ChatbotController extends Controller
         return view('chatbot');
     }
 
-    private $defaultPrompt = "You are a cooking assistant. Help users with cooking related questions. Make sure to provide clear and concise answers. If you don't know the answer, say 'I don't know'.";
+    private $defaultPrompt = "You are a cooking assistant. Help users with cooking related questions. Make sure to provide clear and concise answers. If you don't know the answer, say 'I don't know'.
+    If user asks for a recipe, provide a simple recipe with ingredients and steps.
+    If user asks for cooking tips, provide useful tips.
+    If user asks for a cooking technique, explain it clearly.
+    If user asks for a food substitution, suggest a suitable alternative.
+    If user asks for a cooking time, provide an estimated time.
+    If user asks for a cooking temperature, provide a suitable temperature.
+    If user asks for a cooking method, explain it clearly.
+    If user asks for a cooking tool, suggest a suitable tool.
+    If user asks for a cooking term, explain it clearly.
+    If user asks for a cooking measurement, provide a suitable measurement.
+    If user asks for a cooking ingredient, suggest a suitable ingredient.
+    If user asks for a cooking technique, explain it clearly.   
+    If user ask about anything else, politely inform them that you can only assist with cooking related questions.
+    Please respond in a friendly and helpful manner.
+    Jawablah dengan bahasa Indonesia.
+    ";
 
     public function sendMessage(Request $request)
     {
@@ -86,6 +102,19 @@ class ChatbotController extends Controller
                 throw new \Exception('Failed to parse JSON response: ' . json_last_error_msg());
             }
 
+            // Handle various API response scenarios
+            if (isset($responseData['error'])) {
+                $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred';
+                $errorCode = $responseData['error']['code'] ?? 500;
+                
+                // Handle specific error cases
+                if ($errorCode == 503) {
+                    return response()->json([
+                        'response' => "Maaf, saya sedang mengalami kesibukan. Mohon coba beberapa saat lagi."
+                    ]);
+                }
+            }
+
             // Extract text from response - handle both v1 and v1beta response structures
             if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
                 $generatedText = $responseData['candidates'][0]['content']['parts'][0]['text'];
@@ -93,16 +122,19 @@ class ChatbotController extends Controller
                 $generatedText = $responseData['candidates'][0]['text'];
             } else {
                 \Log::error('API Response Structure:', ['response' => $responseData]);
-                throw new \Exception('Could not find text in API response. Response structure: ' . json_encode($responseData));
+                return response()->json([
+                    'response' => "Maaf, hal yang Anda tanyakan di luar kemampuan saya. Saya hanya bisa membantu dengan pertanyaan seputar memasak."
+                ]);
             }
 
             // Send the response with the original text (keeping markdown formatting)
             return response()->json(['response' => $generatedText]);
             
         } catch (\Exception $e) {
+            \Log::error('Chatbot Error:', ['error' => $e->getMessage()]);
             return response()->json([
-                'response' => 'Sorry, I encountered an error: ' . $e->getMessage()
-            ], 500);
+                'response' => "Maaf, saya sedang mengalami kendala teknis. Mohon coba beberapa saat lagi."
+            ]);
         }
     }
     //
