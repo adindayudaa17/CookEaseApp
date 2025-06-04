@@ -22,33 +22,32 @@
         .border-primary { border-color: var(--primary-red); }
         .hover\:bg-primary:hover { background-color: var(--primary-red); }
 
-        /* Style untuk ikon hati */
         .favorite-icon-active {
-            color: #ef4444; /* Tailwind's red-500 */
+            color: #ef4444; 
             fill: currentColor;
         }
         .favorite-icon-inactive {
-            color: #6b7280; /* Tailwind's gray-500 */
+            color: #6b7280; 
         }
         .favorite-icon-inactive:hover {
-            color: #ef4444; /* Merah saat hover jika tidak aktif */
+            color: #ef4444; 
         }
-        .favorite-button { /* Common class for the button */
+        .favorite-button { 
             position: absolute;
-            top: 0.75rem; /* top-3 */
-            right: 0.75rem; /* right-3 */
-            padding: 0.5rem; /* p-2 */
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.5rem;
             background-color: white;
-            border-radius: 9999px; /* rounded-full */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+            border-radius: 9999px; 
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); 
             transition: background-color 0.15s ease-in-out;
         }
         .favorite-button:hover {
-            background-color: #f9fafb; /* gray-50 */
+            background-color: #f9fafb; 
         }
         .favorite-button:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(138, 36, 36, 0.5); /* Contoh focus ring, sesuaikan dengan warna primary-mu */
+            box-shadow: 0 0 0 3px rgba(138, 36, 36, 0.5); 
         }
     </style>
 </head>

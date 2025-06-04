@@ -174,11 +174,6 @@
     </div>
 
     <div class="container">
-        @isset($viewing_for_user_id)
-            <div class="test-info">
-                Menampilkan favorit untuk User ID: {{ $viewing_for_user_id }} (Mode Tes)
-            </div>
-        @endisset
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
