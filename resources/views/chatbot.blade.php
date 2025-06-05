@@ -3,17 +3,21 @@
 <head>    <title>Cooking Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
-    <style>
-        body {
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>    <style>        body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-wrapper {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         .chat-container {
             width: 90%;
@@ -132,10 +136,60 @@
         }
         .chat-input button:hover {
             background: #b91c1c;
+        }        .header {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b73e3e;
+            flex-shrink: 0;
+        }
+
+        .navbar {
+            display: flex;
+            gap: 25px;
+            font-weight: normal;
+            font-size: 16px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: #444;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .navbar a.active {
+            color: #b73e3e;
+            font-weight: bold;
         }
     </style>
 </head>
-<body>    <div class="chat-container">        <div class="chat-header">
+<body>    <div class="header">
+        <div class="logo">CookEase</div>
+        <nav class="navbar">
+            <a href="/dashboard">Home</a>
+            <a href="/favorites">Favorites</a>
+            <a href="/rate-recipes">Rate Recipe</a>
+            <a href="/chatbot" class="active">Cooking Ast</a>
+            <a href="/settings">Settings</a>
+        </nav>
+    </div>
+    <div class="content-wrapper">
+        <div class="chat-container"><div class="chat-header">
             <i class="fa-solid fa-utensils chef-icon"></i>
             <h2>Cooking Assistant</h2>
         </div>        <div class="chat-messages" id="chatMessages">
